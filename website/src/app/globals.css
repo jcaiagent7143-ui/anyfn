@@ -1,0 +1,124 @@
+:root {
+  --bg: #0b1220;
+  --bg-elevated: #111a2d;
+  --bg-card: #152038;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --sky: #0ea5e9;
+  --green: #22c55e;
+  --red: #ef4444;
+  --outline: #1f2a44;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--sky); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.hero {
+  padding: 96px 0 64px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: clamp(40px, 7vw, 88px);
+  line-height: 1.05;
+  margin: 0 0 16px;
+  letter-spacing: -0.02em;
+}
+.hero h1 .accent { color: var(--sky); }
+.hero p.tagline {
+  font-size: clamp(18px, 2vw, 22px);
+  color: var(--text-muted);
+  max-width: 720px;
+  margin: 0 auto 40px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  border-radius: 12px;
+  background: var(--sky);
+  color: #02101d;
+  font-weight: 600;
+  font-size: 16px;
+}
+.cta.secondary {
+  background: transparent;
+  color: var(--sky);
+  border: 1px solid var(--outline);
+}
+
+.row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+.demo {
+  margin: 72px auto 0;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--outline);
+  background: var(--bg-elevated);
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.demo p {
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 64px 0;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--outline);
+  border-radius: 18px;
+  padding: 24px;
+}
+.card h3 { margin: 0 0 8px; font-size: 18px; }
+.card p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+
+.section { padding: 64px 0; }
+.section h2 { font-size: 32px; margin: 0 0 24px; }
+
+.code {
+  background: #020617;
+  border: 1px solid var(--outline);
+  border-radius: 12px;
+  padding: 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  overflow-x: auto;
+}
+
+footer {
+  border-top: 1px solid var(--outline);
+  padding: 32px 0;
+  margin-top: 96px;
+  color: var(--text-muted);
+  font-size: 14px;
+}

@@ -1,0 +1,1 @@
+Using the anyfn tool whatsapp_send_message, message Mom with: "Landed safely, will call in an hour." Confirm with me first before sending.

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">anyfn</string>
+
+    <string name="accessibility_service_label">anyfn</string>
+    <string name="accessibility_service_summary">Lets anyfn read app UIs to discover and invoke their functions.</string>
+    <string name="accessibility_service_description">anyfn uses Accessibility to read installed apps\' UIs so AI agents can call them as tools. It never sends UI content off-device unless you connect an LLM provider.</string>
+
+    <string name="onboarding_title">Make every app agent-ready</string>
+    <string name="onboarding_subtitle">In 60 seconds, anyfn turns the apps already on your phone into callable tools for any AI agent.</string>
+
+    <string name="cta_grant_accessibility">Grant Accessibility</string>
+    <string name="cta_scan_device">Scan device</string>
+    <string name="cta_paste_api_key">Paste Anthropic API key</string>
+
+    <string name="bridge_running">MCP bridge running on %1$s</string>
+    <string name="bridge_stopped">MCP bridge stopped</string>
+
+    <string name="mcp_channel_name">anyfn bridge</string>
+    <string name="mcp_channel_description">Foreground notification while the MCP bridge is running.</string>
+
+    <!-- Placeholder for the key shipped in source — users override at runtime in settings. -->
+    <string name="default_anthropic_api_key" translatable="false"></string>
+</resources>

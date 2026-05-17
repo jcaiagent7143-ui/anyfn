@@ -1,0 +1,1 @@
+Using the anyfn tool spotify_play_playlist, play the playlist "Discover Weekly".

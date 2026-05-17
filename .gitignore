@@ -1,0 +1,59 @@
+# Gradle
+.gradle/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+local.properties
+captures/
+
+# Android build
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+.cxx/
+
+# Keystores & secrets
+*.jks
+*.keystore
+keystore.properties
+secrets.properties
+.env
+.env.local
+.env.*.local
+
+# Node / website
+node_modules/
+.next/
+.turbo/
+.vercel/
+dist/
+out/
+
+# Docusaurus
+.docusaurus/
+
+# macOS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+*.lcov
+
+# Misc
+tmp/
+.cache/

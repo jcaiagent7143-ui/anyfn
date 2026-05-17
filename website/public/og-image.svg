@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B1220"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="60" y="280" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="160" font-weight="700" fill="#0EA5E9">anyfn</text>
+  <text x="60" y="360" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="36" fill="#E2E8F0">make every Android app agent-ready in 60 seconds.</text>
+  <text x="60" y="420" font-family="-apple-system, BlinkMacSystemFont, Inter, sans-serif" font-size="22" fill="#94A3B8">no code changes · no SDK · no waiting for developers</text>
+  <g transform="translate(960, 460)">
+    <circle cx="80" cy="80" r="80" fill="#152038" stroke="#1F2A44" stroke-width="2"/>
+    <text x="80" y="92" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="32" fill="#22C55E">fn(·)</text>
+  </g>
+  <text x="60" y="560" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#475569">github.com/jcaiagent7143-ui/anyfn · MIT</text>
+</svg>

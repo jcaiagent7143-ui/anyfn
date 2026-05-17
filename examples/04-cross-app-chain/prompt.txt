@@ -1,0 +1,1 @@
+Find videos about "sunset hiking" on TikTok using the anyfn tool tiktok_search. Pick the top 3 results by view count. Save them as a single note in Google Keep titled "Sunset hiking inspo" using anyfn's keep_create_note. Confirm before saving.

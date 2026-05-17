@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- "fn" mark, monospace-ish, centered on the 108x108 adaptive canvas.
+         The drawable assumes the standard 18dp safe-zone inset. -->
+    <group
+        android:translateX="18"
+        android:translateY="18">
+        <path
+            android:pathData="M14,18 L14,54 L20,54 L20,38 L32,38 L32,32 L20,32 L20,24 L34,24 L34,18 Z"
+            android:fillColor="#FFFFFF" />
+        <path
+            android:pathData="M40,30 L46,30 L46,34 C48,31 51,29.5 54,29.5 C60,29.5 62,33 62,38 L62,54 L56,54 L56,40 C56,37 55,35 52,35 C49,35 46,37 46,41 L46,54 L40,54 Z"
+            android:fillColor="#FFFFFF" />
+    </group>
+</vector>
