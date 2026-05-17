@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>anyfn — every Android app, callable.</title>
+<meta name="description" content="anyfn turns every installed app on your phone into a callable tool for AI agents. No code changes. No SDK. No waiting for developers.">
+<meta property="og:title" content="anyfn — every Android app, callable.">
+<meta property="og:description" content="60 seconds. No edits where it counts.">
+<meta property="og:type" content="website">
+<style>
+  :root {
+    --bg: #0b1220;
+    --bg-elevated: #111a2d;
+    --bg-card: #152038;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --sky: #0ea5e9;
+    --sky-bright: #38bdf8;
+    --green: #22c55e;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --outline: #1f2a44;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+  }
+  a { color: var(--sky); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ─── HERO ──────────────────────────────────────────── */
+  .hero {
+    padding: 96px 0 48px;
+    text-align: center;
+    background: radial-gradient(ellipse at top, #0e2540 0%, var(--bg) 60%);
+  }
+  .brand {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 18px;
+    color: var(--sky);
+    letter-spacing: 0.5px;
+    margin-bottom: 32px;
+  }
+  .brand .dot { color: var(--green); }
+  h1 {
+    font-size: clamp(40px, 7vw, 84px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  h1 .accent { color: var(--sky); }
+  .tagline {
+    font-size: clamp(18px, 2vw, 22px);
+    color: var(--text-muted);
+    max-width: 700px;
+    margin: 0 auto 40px;
+  }
+  .cta-row { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 22px;
+    border-radius: 12px;
+    background: var(--sky);
+    color: #02101d;
+    font-weight: 600;
+    font-size: 15px;
+    border: 1px solid var(--sky);
+  }
+  .cta.secondary { background: transparent; color: var(--sky); }
+  .cta:hover { text-decoration: none; opacity: 0.92; }
+
+  /* ─── DEMO PHONE ────────────────────────────────────── */
+  .demo {
+    padding: 64px 0 96px;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 48px;
+    align-items: center;
+  }
+  @media (max-width: 880px) { .demo { grid-template-columns: 1fr; } }
+
+  .demo-narration { font-size: 16px; }
+  .demo-narration h3 {
+    font-size: 14px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .demo-step {
+    padding: 16px 20px;
+    border-left: 3px solid var(--outline);
+    margin-bottom: 12px;
+    opacity: 0.4;
+    transition: opacity 0.4s, border-color 0.4s;
+  }
+  .demo-step.active { opacity: 1; border-color: var(--sky); }
+  .demo-step .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: ui-monospace, monospace;
+    margin-bottom: 4px;
+  }
+  .demo-step .body { font-size: 15px; }
+
+  .phone {
+    width: 280px; height: 560px;
+    margin: 0 auto;
+    border-radius: 38px;
+    background: #02060d;
+    border: 8px solid #1b243b;
+    box-shadow: 0 30px 60px rgba(14, 165, 233, 0.18), 0 0 0 1px var(--outline);
+    position: relative;
+    overflow: hidden;
+  }
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 80px; height: 22px;
+    background: #02060d;
+    border-radius: 0 0 12px 12px;
+    z-index: 4;
+  }
+  .phone-screen {
+    position: absolute;
+    inset: 0;
+    background: #0b1220;
+    overflow: hidden;
+  }
+
+  /* App frames overlay — fade in sequence */
+  .app-frame {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.6s;
+    padding: 38px 16px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .app-frame.active { opacity: 1; }
+
+  .app-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px;
+    background: var(--bg-elevated);
+    border-radius: 14px;
+    margin-bottom: 12px;
+  }
+  .app-bar .app-icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--sky), var(--sky-bright));
+    color: #02101d;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+  .app-bar .app-name { font-size: 14px; font-weight: 600; }
+  .app-bar .app-sub  { font-size: 11px; color: var(--text-muted); }
+
+  .search-row {
+    display: flex; gap: 8px; align-items: center;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--outline);
+    border-radius: 10px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+  .search-row::before {
+    content: "🔍"; opacity: 0.4;
+  }
+  .search-row .typed {
+    color: var(--sky-bright);
+    border-right: 2px solid var(--sky-bright);
+    animation: caret 1s steps(2) infinite;
+  }
+  @keyframes caret { 50% { border-color: transparent; } }
+
+  .result-card {
+    background: var(--bg-card);
+    border: 1px solid var(--outline);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .result-card .title { font-weight: 600; margin-bottom: 2px; }
+  .result-card .meta { color: var(--text-muted); font-size: 10px; }
+
+  .note-frame .note-title {
+    font-size: 14px; font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .note-frame .note-body {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    flex: 1;
+    overflow: hidden;
+  }
+  .note-frame .saved-pill {
+    align-self: flex-start;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--green);
+    margin-top: 10px;
+  }
+
+  /* Run the loop */
+  @keyframes appCycle {
+    0%, 18%   { opacity: 0; }
+    20%, 48%  { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+  @keyframes appCycleNote {
+    0%, 50%   { opacity: 0; }
+    52%, 95%  { opacity: 1; }
+    97%, 100% { opacity: 0; }
+  }
+  @keyframes appCycleHome {
+    0%, 5%    { opacity: 1; }
+    7%, 95%   { opacity: 0; }
+    97%, 100% { opacity: 1; }
+  }
+  .app-frame.home   { animation: appCycleHome 9s infinite; }
+  .app-frame.tiktok { animation: appCycle 9s infinite; }
+  .app-frame.note   { animation: appCycleNote 9s infinite; }
+
+  /* Narration sync via class toggles on script */
+  /* ─── SECTIONS ──────────────────────────────────────── */
+  section { padding: 64px 0; }
+  section h2 {
+    font-size: 32px;
+    margin-bottom: 32px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--outline);
+    border-radius: 18px;
+    padding: 22px;
+  }
+  .card h3 { font-size: 17px; margin-bottom: 8px; }
+  .card p { color: var(--text-muted); font-size: 14px; }
+
+  /* Architecture diagram */
+  .arch {
+    background: #04080f;
+    border: 1px solid var(--outline);
+    border-radius: 12px;
+    padding: 24px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-x: auto;
+    color: var(--text-muted);
+    white-space: pre;
+  }
+  .arch .h { color: var(--sky); }
+  .arch .g { color: var(--green); }
+
+  /* Quick start code */
+  pre.code {
+    background: #04080f;
+    border: 1px solid var(--outline);
+    border-radius: 12px;
+    padding: 20px;
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--text);
+    overflow-x: auto;
+  }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .stat {
+    background: var(--bg-card);
+    border: 1px solid var(--outline);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .stat .n {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--sky);
+    font-family: ui-monospace, monospace;
+  }
+  .stat .l {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Boundary list */
+  .boundaries {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .boundaries h3 { color: var(--red); margin-bottom: 8px; }
+  .boundaries ul { list-style: none; padding: 0; }
+  .boundaries li {
+    padding: 4px 0;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .boundaries li::before { content: "✗  "; color: var(--red); font-weight: bold; }
+
+  footer {
+    border-top: 1px solid var(--outline);
+    padding: 32px 0;
+    margin-top: 64px;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="container">
+    <div class="brand"><span class="dot">fn</span>(·) <strong style="color: var(--text)">anyfn</strong> · open-source</div>
+    <h1>every Android app,<br><span class="accent">callable</span>.</h1>
+    <p class="tagline">
+      anyfn turns the apps already on your phone into tools any AI agent can call —
+      Claude, Gemini, Cursor, GPT. No code changes. No SDK. Sixty seconds to set up.
+    </p>
+    <div class="cta-row">
+      <a class="cta" href="https://github.com/jcaiagent7143-ui/anyfn">View on GitHub →</a>
+      <a class="cta secondary" href="https://github.com/jcaiagent7143-ui/anyfn/releases/latest">Download APK</a>
+    </div>
+  </div>
+</header>
+
+<section class="container demo">
+  <div class="demo-narration">
+    <h3>The demo, in three steps</h3>
+    <div class="demo-step" id="step-1">
+      <div class="label">on your Mac · Claude Desktop</div>
+      <div class="body">"Search TikTok for sunset hiking. Save the top 3 to my notes app."</div>
+    </div>
+    <div class="demo-step" id="step-2">
+      <div class="label">on the phone · anyfn → TikTok</div>
+      <div class="body">anyfn calls <code>tiktok_search</code>. TikTok opens. Search runs. Top results read back.</div>
+    </div>
+    <div class="demo-step" id="step-3">
+      <div class="label">on the phone · anyfn → Google Keep</div>
+      <div class="body">anyfn calls <code>keep_create_note</code>. Note appears. Saved.</div>
+    </div>
+    <p style="color: var(--text-muted); font-size: 13px; margin-top: 24px;">
+      Two unrelated apps. Zero developer cooperation. One sentence from you.
+    </p>
+  </div>
+
+  <div class="phone">
+    <div class="phone-screen">
+      <!-- HOME -->
+      <div class="app-frame home active">
+        <div class="app-bar">
+          <div class="app-icon">fn</div>
+          <div>
+            <div class="app-name">anyfn</div>
+            <div class="app-sub">MCP bridge · ws://localhost:5174</div>
+          </div>
+        </div>
+        <div class="result-card">
+          <div class="title">204 functions</div>
+          <div class="meta">across 47 apps · last scan 2m ago</div>
+        </div>
+        <div class="result-card">
+          <div class="title">Bridge running</div>
+          <div class="meta">Claude Desktop connected · 1 client</div>
+        </div>
+        <div style="flex: 1"></div>
+        <div style="padding: 12px; background: var(--bg-elevated); border-radius: 12px; font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted)">
+          ready · tap to scan again
+        </div>
+      </div>
+
+      <!-- TIKTOK -->
+      <div class="app-frame tiktok">
+        <div class="app-bar">
+          <div class="app-icon" style="background: linear-gradient(135deg, #ff0050, #00f2ea); color: white">TT</div>
+          <div>
+            <div class="app-name">TikTok</div>
+            <div class="app-sub">tiktok_search · running</div>
+          </div>
+        </div>
+        <div class="search-row"><span>sunset hiking</span><span class="typed"></span></div>
+        <div class="result-card">
+          <div class="title">Golden hour above Half Dome</div>
+          <div class="meta">@yosemiteclimber · 2.4M views</div>
+        </div>
+        <div class="result-card">
+          <div class="title">Sunset trail run in Kyoto</div>
+          <div class="meta">@keiko.runs · 890K views</div>
+        </div>
+        <div class="result-card">
+          <div class="title">The colors of Santorini at dusk</div>
+          <div class="meta">@greekisland · 1.1M views</div>
+        </div>
+      </div>
+
+      <!-- NOTE -->
+      <div class="app-frame note note-frame">
+        <div class="app-bar">
+          <div class="app-icon" style="background: linear-gradient(135deg, #fbbc04, #f29900); color: #02101d">K</div>
+          <div>
+            <div class="app-name">Google Keep</div>
+            <div class="app-sub">keep_create_note · done</div>
+          </div>
+        </div>
+        <div class="note-title">Sunset hiking inspo</div>
+        <div class="note-body">
+          1. Golden hour above Half Dome — @yosemiteclimber · 2.4M views<br>
+          2. Sunset trail run in Kyoto — @keiko.runs · 890K views<br>
+          3. The colors of Santorini at dusk — @greekisland · 1.1M views
+        </div>
+        <div class="saved-pill">✓ saved</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <h2>What anyfn does, in four bullets.</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Auto-discovers</h3>
+      <p>Walks every installed app, snapshots its UI through Accessibility, asks an LLM what callable things it exposes. Once.</p>
+    </div>
+    <div class="card">
+      <h3>Persists locally</h3>
+      <p>The function registry lives in SQLite on the device. Nothing leaves the phone unless you tell it to.</p>
+    </div>
+    <div class="card">
+      <h3>Speaks MCP + AppFunctions</h3>
+      <p>One embedded server, one Android 16 exporter. Claude Desktop, Cursor, Gemini, and your own agent see the same tools.</p>
+    </div>
+    <div class="card">
+      <h3>Replays safely</h3>
+      <p>UI Automator + Accessibility, with structured error recovery and per-call destructive-action confirmation.</p>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <h2>The architecture.</h2>
+  <div class="arch"><span class="h">┌─ External Agent ──────────────────────────────────────────────┐</span>
+<span class="h">│</span>  Gemini on Android 16  ·  Claude Desktop  ·  Cursor  ·  GPT   <span class="h">│</span>
+<span class="h">└──────────────────────────────┬────────────────────────────────┘</span>
+                               │  MCP  /  AppFunctions
+<span class="h">┌──────────────────────────────▼────────────────────────────────┐</span>
+<span class="h">│</span>  anyfn Bridge       (Ktor MCP server + AppFunctionService)    <span class="h">│</span>
+<span class="h">└──────────────────────────────┬────────────────────────────────┘</span>
+<span class="h">┌──────────────────────────────▼────────────────────────────────┐</span>
+<span class="h">│</span>  Function Registry  (Room / SQLite, on-device)                <span class="h">│</span>
+<span class="h">└──────────┬────────────────────────────────────┬───────────────┘</span>
+           │                                    │
+<span class="g">┌──────────▼─────────┐                  ┌───────▼──────────┐</span>
+<span class="g">│</span>  Scanner           <span class="g">│</span>                  <span class="g">│</span>  Invoker         <span class="g">│</span>
+<span class="g">│</span>  Accessibility +   <span class="g">│</span>                  <span class="g">│</span>  UI Automator +  <span class="g">│</span>
+<span class="g">│</span>  LLM inference     <span class="g">│</span>                  <span class="g">│</span>  state waiter    <span class="g">│</span>
+<span class="g">└────────────────────┘</span>                  <span class="g">└──────────────────┘</span>
+                                       │
+                              ┌────────▼─────────────┐
+                              │  Target apps         │
+                              │  unmodified          │
+                              └──────────────────────┘
+</div>
+</section>
+
+<section class="container">
+  <h2>Use it from Claude Desktop in 30 seconds.</h2>
+  <pre class="code">$ adb forward tcp:5174 tcp:5174
+
+# claude_desktop_config.json
+{
+  "mcpServers": {
+    "anyfn": {
+      "command": "wscat",
+      "args": ["-c", "ws://localhost:5174/ws"]
+    }
+  }
+}</pre>
+</section>
+
+<section class="container">
+  <h2>What ships in v0.1.</h2>
+  <div class="stats">
+    <div class="stat"><div class="n">9</div><div class="l">apps stable</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">apps beta</div></div>
+    <div class="stat"><div class="n">200+</div><div class="l">inferred functions</div></div>
+    <div class="stat"><div class="n">~$0.30</div><div class="l">per full scan</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">telemetry events</div></div>
+    <div class="stat"><div class="n">MIT</div><div class="l">licensed</div></div>
+  </div>
+</section>
+
+<section class="container">
+  <h2>What anyfn will not do.</h2>
+  <div class="boundaries">
+    <h3>Permanent strategic no.</h3>
+    <ul>
+      <li>Type passwords or 2FA codes. Ever.</li>
+      <li>Touch banking, payment, or password-manager apps.</li>
+      <li>Work around <code>FLAG_SECURE</code>.</li>
+      <li>Unlock your device.</li>
+      <li>Phone home. Zero telemetry, zero analytics, zero phone-home.</li>
+      <li>Ship on the Play Store.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>
+      MIT licensed · built in the open ·
+      <a href="https://github.com/jcaiagent7143-ui/anyfn">GitHub</a> ·
+      <a href="https://github.com/jcaiagent7143-ui/anyfn/blob/main/docs/index.md">Docs</a> ·
+      <a href="https://github.com/jcaiagent7143-ui/anyfn/blob/main/docs/safety/permissions-model.md">Safety</a>
+    </p>
+    <p style="margin-top: 8px; opacity: 0.6">v0.1.0 · May 2026</p>
+  </div>
+</footer>
+
+<script>
+  // Sync the narration steps with the phone-frame animation
+  const steps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
+  const cycle = () => {
+    const t = (Date.now() / 1000) % 9;       // matches @keyframes 9s loop
+    let idx = 0;
+    if (t > 1.8) idx = 1;                    // tiktok frame fades in ~18%
+    if (t > 4.7) idx = 2;                    // note frame fades in ~52%
+    steps.forEach((s, i) => s.classList.toggle('active', i === idx));
+    requestAnimationFrame(cycle);
+  };
+  cycle();
+</script>
+</body>
+</html>
