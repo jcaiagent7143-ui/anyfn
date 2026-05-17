@@ -1,8 +1,10 @@
 # Gradle
 .gradle/
+.kotlin/
 build/
 out/
 !gradle/wrapper/gradle-wrapper.jar
+local.properties
 
 # Android Studio / IntelliJ
 .idea/
