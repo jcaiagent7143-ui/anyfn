@@ -1,106 +1,97 @@
 /**
  * UIAutomatorBridge
  *
- * Thin wrapper around `androidx.test.uiautomator.UiDevice` so action steps
- * read declaratively in [ActionExecutor]. Selectors are mapped from the
- * core [Selector] type into UI Automator's `UiSelector`.
+ * v0.1 implementation note: UI Automator's `UiDevice.getInstance(Instrumentation)`
+ * requires an `Instrumentation` handle that only exists in androidTest source —
+ * not in normal app code. The legitimate way to drive UI from an
+ * AccessibilityService is `AccessibilityNodeInfo.performAction(...)` and
+ * `AccessibilityService.dispatchGesture(...)`.
  *
- * UI Automator is the primary actuation surface because it works
- * cross-process without needing to inject anything into the target app.
+ * This bridge therefore delegates click/typing/scroll/key actions to the
+ * Accessibility framework. We keep the class name "UIAutomatorBridge" for
+ * caller continuity; the architecture stays correct if we add UI Automator
+ * back in a future test-only flavour.
  */
 package dev.anyfn.invoker
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.BySelector
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.UiObject2
-import androidx.test.uiautomator.UiSelector
-import androidx.test.uiautomator.Until
+import android.os.Bundle
+import android.view.accessibility.AccessibilityNodeInfo
+import dev.anyfn.accessibility.AnyfnAccessibilityService
+import dev.anyfn.core.model.ScrollDirection
 import dev.anyfn.core.model.Selector
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class UIAutomatorBridge @Inject constructor() {
-
-    private val device: UiDevice by lazy {
-        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-    }
+class UIAutomatorBridge @Inject constructor(
+    private val a11y: AccessibilityBridge,
+) {
 
     fun launch(packageName: String, context: Context) {
         val launch = context.packageManager.getLaunchIntentForPackage(packageName)
             ?: error("No launch intent for $packageName")
-        launch.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(launch)
     }
 
-    fun pressBack(): Boolean = device.pressBack()
-    fun pressEnter(): Boolean = device.pressEnter()
-    fun pressHome(): Boolean = device.pressHome()
+    fun pressBack(): Boolean = AnyfnAccessibilityService.performGlobalAction(
+        android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK,
+    )
 
-    fun find(selector: Selector, timeoutMs: Long = 5_000L): UiObject2? =
-        device.wait(Until.findObject(selector.toBy()), timeoutMs)
+    fun pressHome(): Boolean = AnyfnAccessibilityService.performGlobalAction(
+        android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME,
+    )
+
+    /** Best-effort: most apps treat "type then ACTION_CLICK on send" as enter. */
+    fun pressEnter(): Boolean = false
+
+    fun find(selector: Selector, timeoutMs: Long = 5_000L): AccessibilityNodeInfo? =
+        a11y.findFirst(selector)
 
     fun click(selector: Selector, timeoutMs: Long = 5_000L): Boolean {
         val node = find(selector, timeoutMs) ?: return false
-        node.click()
-        return true
+        return node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
     }
 
     fun typeText(selector: Selector, text: String, timeoutMs: Long = 5_000L): Boolean {
         val node = find(selector, timeoutMs) ?: return false
-        node.text = text
-        return true
+        val args = Bundle().apply {
+            putCharSequence(
+                AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                text,
+            )
+        }
+        return node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
     }
 
-    fun scroll(direction: dev.anyfn.core.model.ScrollDirection, steps: Int = 6): Boolean {
-        val w = device.displayWidth
-        val h = device.displayHeight
-        return when (direction) {
-            dev.anyfn.core.model.ScrollDirection.DOWN -> device.swipe(w / 2, (h * 0.75).toInt(), w / 2, (h * 0.25).toInt(), steps)
-            dev.anyfn.core.model.ScrollDirection.UP -> device.swipe(w / 2, (h * 0.25).toInt(), w / 2, (h * 0.75).toInt(), steps)
-            dev.anyfn.core.model.ScrollDirection.LEFT -> device.swipe((w * 0.75).toInt(), h / 2, (w * 0.25).toInt(), h / 2, steps)
-            dev.anyfn.core.model.ScrollDirection.RIGHT -> device.swipe((w * 0.25).toInt(), h / 2, (w * 0.75).toInt(), h / 2, steps)
+    fun scroll(direction: ScrollDirection, steps: Int = 6): Boolean {
+        val root = a11y.root() ?: return false
+        val scrollable = findScrollable(root) ?: return false
+        val action = when (direction) {
+            ScrollDirection.DOWN, ScrollDirection.RIGHT -> AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+            ScrollDirection.UP, ScrollDirection.LEFT -> AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
         }
+        return scrollable.performAction(action)
     }
 
     fun waitForIdle(timeoutMs: Long = 3_000L) {
-        device.waitForIdle(timeoutMs)
+        // Accessibility events drive idle detection in [StateWaiter]; no-op here.
     }
 
-    fun currentPackage(): String? = device.currentPackageName
+    fun currentPackage(): String? = a11y.root()?.packageName?.toString()
 
-    fun deviceInfo(): String = buildString {
-        append("uiautomator on android ")
-        append(Build.VERSION.SDK_INT)
-        append(", display ")
-        append(device.displayWidth).append("x").append(device.displayHeight)
-    }
+    fun deviceInfo(): String = "anyfn a11y-bridge on android ${Build.VERSION.SDK_INT}"
 
-    @Suppress("UnusedPrivateMember")
-    private fun Selector.toBy(): BySelector {
-        val base: BySelector = when {
-            byResourceId != null -> By.res(byResourceId)
-            byText != null -> By.text(byText)
-            byContentDescription != null -> By.desc(byContentDescription)
-            byClassName != null -> By.clazz(byClassName)
-            else -> error("empty selector")
+    private fun findScrollable(node: AccessibilityNodeInfo): AccessibilityNodeInfo? {
+        if (node.isScrollable) return node
+        for (i in 0 until node.childCount) {
+            val child = node.getChild(i) ?: continue
+            val match = findScrollable(child)
+            if (match != null) return match
         }
-        return base
-    }
-
-    @Suppress("UnusedPrivateMember")
-    private fun Selector.toUiSelector(): UiSelector {
-        val s = UiSelector()
-        return when {
-            byResourceId != null -> s.resourceId(byResourceId)
-            byText != null -> s.text(byText)
-            byContentDescription != null -> s.description(byContentDescription)
-            byClassName != null -> s.className(byClassName)
-            else -> error("empty selector")
-        }
+        return null
     }
 }

@@ -69,6 +69,10 @@ class AnyfnAccessibilityService : AccessibilityService() {
 
         fun rootNode(): AccessibilityNodeInfo? = instance.get()?.rootInActiveWindow
 
+        /** Dispatches a global action (BACK, HOME, RECENTS, …) on the live service, if connected. */
+        fun performGlobalAction(action: Int): Boolean =
+            instance.get()?.performGlobalAction(action) ?: false
+
         fun subscribe(subscriber: Subscriber) {
             subscribers.add(subscriber)
         }

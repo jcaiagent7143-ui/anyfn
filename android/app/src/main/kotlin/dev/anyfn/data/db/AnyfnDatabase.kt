@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [AppFunctionEntity::class, ScanRunEntity::class],
     version = 1,
-    exportSchema = true,
+    exportSchema = false,
 )
 abstract class AnyfnDatabase : RoomDatabase() {
     abstract fun appFunctionDao(): AppFunctionDao

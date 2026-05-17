@@ -27,7 +27,7 @@ object DataModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AnyfnDatabase =
         Room.databaseBuilder(context, AnyfnDatabase::class.java, AnyfnDatabase.NAME)
-            .fallbackToDestructiveMigration(true)
+            .fallbackToDestructiveMigration()
             .build()
 
     @Provides

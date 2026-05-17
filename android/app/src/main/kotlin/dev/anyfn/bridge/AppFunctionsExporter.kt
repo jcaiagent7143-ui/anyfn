@@ -14,6 +14,7 @@ package dev.anyfn.bridge
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.anyfn.data.repository.FunctionRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +22,7 @@ import kotlinx.coroutines.flow.first
 
 @Singleton
 class AppFunctionsExporter @Inject constructor(
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val repository: FunctionRepository,
 ) {
 

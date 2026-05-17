@@ -30,7 +30,7 @@ class UITreeExtractor @Inject constructor(private val json: Json) {
         )
     }
 
-    fun toJson(tree: UiTree): String = json.encodeToString(tree)
+    fun toJson(tree: UiTree): String = json.encodeToString(UiTree.serializer(), tree)
 
     private fun walk(node: AccessibilityNodeInfo?, depth: Int): UiNode? {
         if (node == null || depth > MAX_DEPTH) return null

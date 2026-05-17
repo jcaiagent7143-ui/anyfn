@@ -16,6 +16,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
 @Singleton
@@ -51,8 +52,8 @@ class FunctionRepository @Inject constructor(
         packageName = packageName,
         appLabel = appLabel,
         description = description,
-        parameters = json.decodeFromString<List<ParameterSchema>>(parametersJson),
-        uiPath = json.decodeFromString<List<UiAction>>(uiPathJson),
+        parameters = json.decodeFromString(ListSerializer(ParameterSchema.serializer()), parametersJson),
+        uiPath = json.decodeFromString(ListSerializer(UiAction.serializer()), uiPathJson),
         confidence = confidence,
         requiresReview = requiresReview,
         destructive = destructive,
@@ -65,8 +66,8 @@ class FunctionRepository @Inject constructor(
         packageName = packageName,
         appLabel = appLabel,
         description = description,
-        parametersJson = json.encodeToString(parameters),
-        uiPathJson = json.encodeToString(uiPath),
+        parametersJson = json.encodeToString(ListSerializer(ParameterSchema.serializer()), parameters),
+        uiPathJson = json.encodeToString(ListSerializer(UiAction.serializer()), uiPath),
         confidence = confidence,
         requiresReview = requiresReview,
         destructive = destructive,

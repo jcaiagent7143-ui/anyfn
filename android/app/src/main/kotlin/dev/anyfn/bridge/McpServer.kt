@@ -37,8 +37,8 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
+import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.header
@@ -48,11 +48,11 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import io.ktor.server.sse.SSE
-import io.ktor.server.sse.sse
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
+import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -67,7 +67,6 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlin.time.Duration.Companion.seconds
 
 @Singleton
 class McpServer @Inject constructor(
@@ -77,7 +76,7 @@ class McpServer @Inject constructor(
 ) {
 
     private val json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
-    private var engine: EmbeddedServer<*, *>? = null
+    private var engine: ApplicationEngine? = null
 
     @Volatile var lastError: String? = null
         private set
@@ -92,8 +91,7 @@ class McpServer @Inject constructor(
         val secret = snap.mcpSharedSecret.takeIf { it.isNotBlank() }
 
         engine = embeddedServer(CIO, host = host, port = port) {
-            install(WebSockets) { pingPeriod = 20.seconds }
-            install(SSE)
+            install(WebSockets) { pingPeriodMillis = 20_000L }
             install(ContentNegotiation) { json(json) }
             install(StatusPages) {
                 exception<Throwable> { call, cause ->
@@ -113,7 +111,7 @@ class McpServer @Inject constructor(
                 }
                 webSocket("/ws") {
                     if (!authorise(secret, call.request.headers["x-anyfn-secret"])) {
-                        close(io.ktor.websocket.CloseReason(4401, "unauthorized"))
+                        close(CloseReason(4401, "unauthorized"))
                         return@webSocket
                     }
                     incoming.consumeEach { frame ->
@@ -122,9 +120,6 @@ class McpServer @Inject constructor(
                             send(Frame.Text(reply))
                         }
                     }
-                }
-                sse("/sse") {
-                    send("event", "ready")
                 }
                 post("/rpc") {
                     if (!authorise(secret, call.request.header("x-anyfn-secret"))) {
